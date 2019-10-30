@@ -1,0 +1,5 @@
+<h1>Name: <%=@name%></h1>
+<h1>Artist: <a href="../artists/<%=@artist.name%>"><%=@artist.name%></a></h1>
+<h2>Genre: <ul><%@genres.each{|genre|%>
+<li><a href="../genres/<%=genre.name%>"><%=genre.name%></a></li>
+<%}%></ul></h2>
