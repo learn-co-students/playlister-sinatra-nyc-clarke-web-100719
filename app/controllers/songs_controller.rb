@@ -5,25 +5,22 @@ class SongsController < ApplicationController
     use Rack::Flash
 
     get '/songs' do
-
-        @songs = Song.all #define instance variable for view
-      
-        erb :'songs/index' #show all songs view (index)
-      
+        @songs = Song.all 
+        erb :'songs/index'
     end
       
       
     get '/songs/new' do
-        @genres = Genre.all
-
-        erb :'songs/new' #show new songs view
-    
+        @genres = Genre.all #to display genres in dropdown menu
+        erb :'songs/new'
     end
 
+    get '/songs/:slug' do        
+        @song = Song.find_by_slug(params[:slug])
+        erb :'songs/show'
+    end
 
     post '/songs' do
-
-        #below works with properly formatted params in HTML form
         name = params[:name]
         artist_name = params[:artist]
         artist = Artist.find_or_create_by(name: artist_name)
@@ -34,40 +31,19 @@ class SongsController < ApplicationController
             SongGenre.create(genre_id: genre_id, song_id: @song.id)
         end
         
-        if @song #saves new songs or returns false if unsuccessful
-            flash[:message] = "Successfully created song."
-            redirect "/songs/#{@song.slug}" #redirect back to songs index page
-        else
-            erb :'songs/new' # show new songs view again(potentially displaying errors)
-        end
-    
-    end
-
-    get '/songs/:slug' do
-
-        #gets params from url
-        
-        @song = Song.find_by_slug(params[:slug]) #define instance variable for view
-        
-
-        erb :'songs/show' #show single songs view
-        
+        flash[:message] = "Successfully created song."
+        redirect "/songs/#{@song.slug}" #redirect back to songs index page
     end
 
     get '/songs/:slug/edit' do
         @genres = Genre.all
-        #get params from url
-
-        @song = Song.find_by_slug(params[:slug]) #define intstance variable for view
-        
+        @song = Song.find_by_slug(params[:slug])        
         @genre_ids = @song.genres.map { |genre| genre.id }
-
-        erb :"songs/edit" #show edit songs view
-        
+        erb :"songs/edit"
     end
 
       patch '/songs/:slug' do
-        @song = Song.find_by_slug(params[:slug]) #define variable to edit
+        @song = Song.find_by_slug(params[:slug])
         if params[:name] == ""
             name = @song.name
         else
@@ -81,7 +57,6 @@ class SongsController < ApplicationController
         end
         artist = Artist.find_or_create_by(name: artist_name)
 
-        #get params from url
         @song.song_genres.each { |song_genre| song_genre.destroy }
         genre_ids = params[:genres]
         genre_ids.each do |genre_id|
@@ -90,20 +65,6 @@ class SongsController < ApplicationController
         @song.update(name: name, artist_id: artist.id)
 
         flash[:message] = "Successfully updated song."
-        redirect "/songs/#{@song.slug}" 
-              
-      end
-
-      delete '/songs/:slug' do
-
-        #get params from url
-        @song = Song.find(params[:slug]) #define songs to delete
-      
-        @song.destroy #delete songs
-      
-        redirect '/songs' #redirect back to songs index page
-      
-      end
-    
-    
+        redirect "/songs/#{@song.slug}"               
+      end    
 end
