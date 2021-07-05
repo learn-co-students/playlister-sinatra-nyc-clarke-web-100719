@@ -6,4 +6,16 @@ class ApplicationController < Sinatra::Base
   get '/' do
     erb :index
   end
+
+  def slug(name)
+    slug_name = name.sub(" ", "-")
+    slug_name
+  end
+
+  def find_by_slug(slug)
+    name = slug.sub("-", " ")
+    name
+    #[Song/Genre/Artist].find_by(name: name)
+  end
+
 end
